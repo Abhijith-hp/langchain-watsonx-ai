@@ -1,8 +1,14 @@
 from langchain_core.documents import Document
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
+from ibm_watsonx_ai.metanames import EmbedTextParamsMetaNames
+from langchain_ibm import WatsonxEmbeddings
+from langchain.vectorstores import Chroma
 
-
+embed_params = {
+    EmbedTextParamsMetaNames.TRUNCATE_INPUT_TOKENS :3,
+    EmbedTextParamsMetaNames.RETURN_OPTIONS: {"input_text":True}
+}
 paper_url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/96-FDF8f7coh0ooim7NyEQ/langchain-paper.pdf"
 pdf_loader = PyPDFLoader(paper_url)
 pdf_document =  pdf_loader.load()
@@ -52,5 +58,24 @@ def display_document_stats(docs, name):
         print(f"Max chunk size: {max_len} characters")
 
 
+
+
 display_document_stats(chunks_1, "Splitter 1")
 display_document_stats(chunks_2, "Splitter 2")
+
+
+
+watsonx_embedding = WatsonxEmbeddings(
+    model_id="ibm/slate-125m-english-rtrvr-v2",
+    url="https://us-south.ml.cloud.ibm.com",
+    project_id="skills-network",
+    params=embed_params,
+)
+
+
+
+docsearch = Chroma.from_documents(chunks_1, watsonx_embedding)
+
+query = "Langchain"
+docs = docsearch.similarity_search(query)
+print(docs[0].page_content)
