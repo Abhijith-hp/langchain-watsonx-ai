@@ -21,3 +21,5 @@ retriever = ParentDocumentRetriever(
     child_splitter=child_splitter,
     parent_splitter=parent_splitter,
 )
+
+retriever.add_documents(document)

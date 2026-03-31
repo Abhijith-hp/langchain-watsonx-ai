@@ -79,3 +79,6 @@ docsearch = Chroma.from_documents(chunks_1, watsonx_embedding)
 query = "Langchain"
 docs = docsearch.similarity_search(query)
 print(docs[0].page_content)
+
+retriver = docsearch.as_retriever()
+docs = retriver.invoke(query)
